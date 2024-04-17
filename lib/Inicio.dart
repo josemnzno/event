@@ -1,9 +1,8 @@
-import 'package:event/Seleccion.dart';
-import 'package:event/Tipo.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'Crear_cuenta.dart';
+import 'Menu.dart';
+import 'Recuperar_Contrasenia.dart'; // Importa la pantalla de restablecimiento de contraseña
 
 class Inicio extends StatelessWidget {
   Inicio({Key? key});
@@ -99,12 +98,26 @@ class Inicio extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 50),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ResetPasswordPage()), // Dirigir a la pantalla de restablecimiento de contraseña
+                    );
+                  },
+                  child: Text(
+                    '¿Olvidó su contraseña?',
+                    style: TextStyle(
+                      fontSize: 20, // Tamaño de fuente ajustado a 20
+                      // Puedes agregar más estilos aquí según sea necesario
+                    ),
+                  ),
+                ),
+                SizedBox(height: 30),
                 InkWell(
                   onTap: () {
                     String email = emailController.text;
                     String password = passwordController.text;
-                    // Validar los campos antes de intentar iniciar sesión
                     if (email.isEmpty || password.isEmpty) {
                       showDialog(
                         context: context,
@@ -124,7 +137,6 @@ class Inicio extends StatelessWidget {
                         },
                       );
                     } else {
-                      // Iniciar sesión con el correo electrónico y contraseña ingresados
                       signInWithEmailAndPassword(context, email, password);
                     }
                   },

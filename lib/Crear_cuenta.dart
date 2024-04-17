@@ -50,7 +50,7 @@ class _Crear_cuentaState extends State<Crear_cuenta> {
     try{
       await firabase.collection('User').doc().set(
           {
-            "Nombres":_lastNameController.text,
+            "Nombres":_firstNameController.text,
             "Apellidos":_lastNameController.text,
             "Email":_emailController.text,
             "Telefono":_phoneController.text,
