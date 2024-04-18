@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Importa este paquete para utilizar FilteringTextInputFormatter
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+
 
 class Crear_Evento extends StatefulWidget {
   const Crear_Evento({Key? key}) : super(key: key);
 
   @override
   _Crear_EventoState createState() => _Crear_EventoState();
+
 }
+Future<void> _selectImage() async {
+  final picker = ImagePicker();
+  final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+  if (pickedImage != null) {
+    // Aquí puedes manejar la imagen seleccionada, como mostrarla en la interfaz de usuario o guardarla
+    print('Imagen seleccionada: ${pickedImage.path}');
+  }
+}
+
 
 class _Crear_EventoState extends State<Crear_Evento> {
   TextEditingController _nombreEventoController =
   TextEditingController(); // Controlador para el campo de texto del nombre del evento
   TextEditingController _boletosDisponiblesController =
   TextEditingController(); // Controlador para el campo de texto de boletos disponibles
+  TextEditingController _precioAdultoController =
+  TextEditingController(); // Controlador para el campo de texto del precio para adultos
+  TextEditingController _precioNinoController =
+  TextEditingController(); // Controlador para el campo de texto del precio para niños
+  TextEditingController _precioSeniorController =
+  TextEditingController(); // Controlador para el campo de texto del precio para seniors
+  TextEditingController _descripcionController =
+  TextEditingController(); // Controlador para el campo de texto de la descripción
   DateTime? _selectedStartDate; // Variable para almacenar la fecha de inicio seleccionada
   DateTime? _selectedEndDate; // Variable para almacenar la fecha de fin seleccionada
-  TimeOfDay? _selectedTime; // Variable para almacenar la hora seleccionada
+  TimeOfDay? _selectedStartTime; // Variable para almacenar la hora de inicio seleccionada
+  TimeOfDay? _selectedEndTime; // Variable para almacenar la hora de fin seleccionada
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +102,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                     ),
                     SizedBox(height: 20),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
                           Text(
@@ -92,9 +112,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                               fontWeight: FontWeight.normal,
                             ),
                           ),
-                          SizedBox(
-                            width: 5,
-                          ),
+                          SizedBox(width: 5),
                           ElevatedButton(
                             onPressed: () async {
                               final selectedDate = await showDatePicker(
@@ -115,9 +133,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                                   : 'Dia',
                             ),
                           ),
-                          SizedBox(
-                            width: 5,
-                          ),
+                          SizedBox(width: 5),
                           ElevatedButton(
                             onPressed: () async {
                               final selectedTime = await showTimePicker(
@@ -126,13 +142,13 @@ class _Crear_EventoState extends State<Crear_Evento> {
                               );
                               if (selectedTime != null) {
                                 setState(() {
-                                  _selectedTime = selectedTime;
+                                  _selectedStartTime = selectedTime;
                                 });
                               }
                             },
                             child: Text(
-                              _selectedTime != null
-                                  ? '${_selectedTime!.hour}:${_selectedTime!.minute}'
+                              _selectedStartTime != null
+                                  ? '${_selectedStartTime!.hour}:${_selectedStartTime!.minute}'
                                   : 'Hora',
                             ),
                           ),
@@ -141,9 +157,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                     ),
                     SizedBox(height: 10),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
                           Text(
@@ -153,9 +167,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                               fontWeight: FontWeight.normal,
                             ),
                           ),
-                          SizedBox(
-                            width: 5,
-                          ),
+                          SizedBox(width: 5),
                           ElevatedButton(
                             onPressed: () async {
                               final selectedDate = await showDatePicker(
@@ -166,19 +178,17 @@ class _Crear_EventoState extends State<Crear_Evento> {
                               );
                               if (selectedDate != null) {
                                 setState(() {
-                                  _selectedStartDate = selectedDate;
+                                  _selectedEndDate = selectedDate;
                                 });
                               }
                             },
                             child: Text(
-                              _selectedStartDate != null
-                                  ? '${_selectedStartDate!.day}/${_selectedStartDate!.month}/${_selectedStartDate!.year}'
+                              _selectedEndDate != null
+                                  ? '${_selectedEndDate!.day}/${_selectedEndDate!.month}/${_selectedEndDate!.year}'
                                   : 'Dia',
                             ),
                           ),
-                          SizedBox(
-                            width: 5,
-                          ),
+                          SizedBox(width: 5),
                           ElevatedButton(
                             onPressed: () async {
                               final selectedTime = await showTimePicker(
@@ -187,13 +197,13 @@ class _Crear_EventoState extends State<Crear_Evento> {
                               );
                               if (selectedTime != null) {
                                 setState(() {
-                                  _selectedTime = selectedTime;
+                                  _selectedEndTime = selectedTime;
                                 });
                               }
                             },
                             child: Text(
-                              _selectedTime != null
-                                  ? '${_selectedTime!.hour}:${_selectedTime!.minute}'
+                              _selectedEndTime != null
+                                  ? '${_selectedEndTime!.hour}:${_selectedEndTime!.minute}'
                                   : 'Hora',
                             ),
                           ),
@@ -202,41 +212,153 @@ class _Crear_EventoState extends State<Crear_Evento> {
                     ),
                     SizedBox(height: 20),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 30, // Ajusta el espacio horizontal aquí
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 30),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Boletos\nDisponibles:',
+                                  style: TextStyle(
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                TextFormField(
+                                  controller: _boletosDisponiblesController,
+                                  style: TextStyle(fontSize: 15),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d+\.?\d{0,2}')),
+                                  ], // Acepta solo números
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: '"1000"',
+                                    filled: true,
+                                    fillColor: Colors.greenAccent[100],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Precio \nBoletos:',
+                                  style: TextStyle(
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _precioAdultoController,
+                                        style: TextStyle(fontSize: 15),
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          hintText: 'Adultos',
+                                          filled: true,
+                                          fillColor: Colors.greenAccent[100],
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _precioNinoController,
+                                        style: TextStyle(fontSize: 15),
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          hintText: 'Niños',
+                                          filled: true,
+                                          fillColor: Colors.greenAccent[100],
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _precioSeniorController,
+                                        style: TextStyle(fontSize: 15),
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          hintText: 'Senior',
+                                          filled: true,
+                                          fillColor: Colors.greenAccent[100],
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 30),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Boletos Disponibles:',
+                            'Descripción:',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _boletosDisponiblesController,
-                              style: TextStyle(fontSize: 15),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d+\.?\d{0,2}')),
-                              ], // Acepta solo números
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: 'ejemplo "100"',
-                                filled: true,
-                                fillColor: Colors.greenAccent[100],
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                          SizedBox(height: 10),
+                          TextFormField(
+                            controller: _descripcionController,
+                            style: TextStyle(fontSize: 15),
+                            maxLines: null, // Permitir múltiples líneas
+                            keyboardType: TextInputType.multiline,
+                            maxLength: 250, // Limitar a 200 caracteres
+                            decoration: InputDecoration(
+                              hintText: 'Agrega una descripción',
+                              filled: true,
+                              fillColor: Colors.greenAccent[100],
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    GestureDetector(
+                      onTap: _selectImage, // Llama al método _selectImage() cuando se toca la imagen
+                      child: Image.asset(
+                        'lib/pantallas/Crear_cuenta.png', // Ruta de la imagen a utilizar
+                        // Ruta de la imagen a utilizar
+                        width: 175, // Ancho de la imagen
+                        height: 175, // Alto de la imagen
                       ),
                     ),
                   ],
@@ -253,6 +375,10 @@ class _Crear_EventoState extends State<Crear_Evento> {
   void dispose() {
     _nombreEventoController.dispose();
     _boletosDisponiblesController.dispose();
+    _precioAdultoController.dispose();
+    _precioNinoController.dispose();
+    _precioSeniorController.dispose();
+    _descripcionController.dispose();
     super.dispose();
   }
 }

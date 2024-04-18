@@ -37,6 +37,7 @@ dependencies:
   firebase_auth: ^4.19.0
   shared_preferences: ^2.0.7
   flutter_datetime_picker: ^1.5.1
+  image_picker: ^0.8.4+3
 
 
 
@@ -69,6 +70,9 @@ flutter:
     - lib/pantallas/Start.png
     - lib/pantallas/Crear_Evento.png
     - lib/pantallas/Pantalla_Eventos.png
+    - lib/pantallas/Agregar_Ubicacion.png
+    - lib/pantallas/Agregar_Imagen.png
+    - lib/pantallas/Agregar_Imagen.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
