@@ -92,7 +92,7 @@ class _TipoState extends State<Tipo> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(height: 110),
+                    SizedBox(height: 70),
                     Text(
                       'EventApp',
                       textAlign: TextAlign.center,
@@ -103,7 +103,7 @@ class _TipoState extends State<Tipo> {
                     ),
                     SizedBox(height: 40),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 40),
                       child: Row(
                         children: [
                           Expanded(
@@ -137,7 +137,7 @@ class _TipoState extends State<Tipo> {
                       },
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
-                        width: 250,
+                        width: 220,
                       ),
                     ),
                     SizedBox(

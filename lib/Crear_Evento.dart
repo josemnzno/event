@@ -1,7 +1,8 @@
+import 'package:event/Menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:location_picker_flutter_map/location_picker_flutter_map.dart';
 
 class Crear_Evento extends StatefulWidget {
   const Crear_Evento({Key? key}) : super(key: key);
@@ -10,16 +11,6 @@ class Crear_Evento extends StatefulWidget {
   _Crear_EventoState createState() => _Crear_EventoState();
 
 }
-Future<void> _selectImage() async {
-  final picker = ImagePicker();
-  final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-
-  if (pickedImage != null) {
-    // Aquí puedes manejar la imagen seleccionada, como mostrarla en la interfaz de usuario o guardarla
-    print('Imagen seleccionada: ${pickedImage.path}');
-  }
-}
-
 
 class _Crear_EventoState extends State<Crear_Evento> {
   TextEditingController _nombreEventoController =
@@ -39,6 +30,20 @@ class _Crear_EventoState extends State<Crear_Evento> {
   TimeOfDay? _selectedStartTime; // Variable para almacenar la hora de inicio seleccionada
   TimeOfDay? _selectedEndTime; // Variable para almacenar la hora de fin seleccionada
 
+
+  Future<void> _selectImage() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      // Aquí puedes manejar la imagen seleccionada, como mostrarla en la interfaz de usuario o guardarla
+      print('Imagen seleccionada: ${pickedImage.path}');
+    }
+  }
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,16 +62,16 @@ class _Crear_EventoState extends State<Crear_Evento> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(height: 80),
+                    SizedBox(height: 50),
                     Text(
                       'Crear Evento',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 40,
+                        fontSize: 30,
                         fontWeight: FontWeight.normal,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 10),
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: 60,
@@ -76,12 +81,12 @@ class _Crear_EventoState extends State<Crear_Evento> {
                           Text(
                             'Nombre:',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
                           SizedBox(
-                            width: 10,
+                            width: 5,
                           ),
                           Expanded(
                             child: TextFormField(
@@ -100,7 +105,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 10),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
@@ -108,7 +113,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                           Text(
                             'Empieza:   ',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -155,7 +160,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 5),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
@@ -163,7 +168,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                           Text(
                             'Termina:   ',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -210,7 +215,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 10),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 30),
                       child: Row(
@@ -224,7 +229,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                                 Text(
                                   'Boletos\nDisponibles:',
                                   style: TextStyle(
-                                    fontSize: 19,
+                                    fontSize: 17,
                                     fontWeight: FontWeight.normal,
                                   ),
                                 ),
@@ -258,7 +263,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                                 Text(
                                   'Precio \nBoletos:',
                                   style: TextStyle(
-                                    fontSize: 19,
+                                    fontSize: 17,
                                     fontWeight: FontWeight.normal,
                                   ),
                                 ),
@@ -268,7 +273,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                                     Expanded(
                                       child: TextFormField(
                                         controller: _precioAdultoController,
-                                        style: TextStyle(fontSize: 15),
+                                        style: TextStyle(fontSize: 12),
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
                                           hintText: 'Adultos',
@@ -284,7 +289,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                                     Expanded(
                                       child: TextFormField(
                                         controller: _precioNinoController,
-                                        style: TextStyle(fontSize: 15),
+                                        style: TextStyle(fontSize: 12),
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
                                           hintText: 'Niños',
@@ -300,7 +305,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                                     Expanded(
                                       child: TextFormField(
                                         controller: _precioSeniorController,
-                                        style: TextStyle(fontSize: 15),
+                                        style: TextStyle(fontSize: 12),
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
                                           hintText: 'Senior',
@@ -328,7 +333,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                           Text(
                             'Descripción:',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 18,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -336,9 +341,9 @@ class _Crear_EventoState extends State<Crear_Evento> {
                           TextFormField(
                             controller: _descripcionController,
                             style: TextStyle(fontSize: 15),
-                            maxLines: null, // Permitir múltiples líneas
+                            maxLines: 5, // Limita a 6 líneas
                             keyboardType: TextInputType.multiline,
-                            maxLength: 250, // Limitar a 200 caracteres
+                            maxLength: 250, // Límite de caracteres
                             decoration: InputDecoration(
                               hintText: 'Agrega una descripción',
                               filled: true,
@@ -351,14 +356,32 @@ class _Crear_EventoState extends State<Crear_Evento> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 5),
                     GestureDetector(
-                      onTap: _selectImage, // Llama al método _selectImage() cuando se toca la imagen
+                      onTap: _selectImage,
                       child: Image.asset(
-                        'lib/pantallas/Crear_cuenta.png', // Ruta de la imagen a utilizar
-                        // Ruta de la imagen a utilizar
-                        width: 175, // Ancho de la imagen
-                        height: 175, // Alto de la imagen
+                        'lib/pantallas/Agregar_Imagen.png',
+                        width: 250,
+                        height: 40,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _selectImage, // Call _selectLocation instead of _selectImage
+                      child: Image.asset('lib/pantallas/Agregar_Ubicacion.png',
+                        width: 250,
+                        height: 40,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Tipo()),
+                        );
+                      },
+                      child: Image.asset(
+                        'lib/pantallas/Crear_Evento.png',
+                        width: 230,
+                        height: 65,
                       ),
                     ),
                   ],
@@ -370,6 +393,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
       ),
     );
   }
+
 
   @override
   void dispose() {
