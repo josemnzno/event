@@ -1,48 +1,88 @@
-import 'package:event/Menu.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:location_picker_flutter_map/location_picker_flutter_map.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'Seleccionar_Ubicacion.dart';
 
 class Crear_Evento extends StatefulWidget {
-  const Crear_Evento({Key? key}) : super(key: key);
+  final User? usuario;
+
+  const Crear_Evento({Key? key, this.usuario}) : super(key: key);
 
   @override
   _Crear_EventoState createState() => _Crear_EventoState();
-
 }
 
-class _Crear_EventoState extends State<Crear_Evento> {
-  TextEditingController _nombreEventoController =
-  TextEditingController(); // Controlador para el campo de texto del nombre del evento
-  TextEditingController _boletosDisponiblesController =
-  TextEditingController(); // Controlador para el campo de texto de boletos disponibles
-  TextEditingController _precioAdultoController =
-  TextEditingController(); // Controlador para el campo de texto del precio para adultos
-  TextEditingController _precioNinoController =
-  TextEditingController(); // Controlador para el campo de texto del precio para niños
-  TextEditingController _precioSeniorController =
-  TextEditingController(); // Controlador para el campo de texto del precio para seniors
-  TextEditingController _descripcionController =
-  TextEditingController(); // Controlador para el campo de texto de la descripción
-  DateTime? _selectedStartDate; // Variable para almacenar la fecha de inicio seleccionada
-  DateTime? _selectedEndDate; // Variable para almacenar la fecha de fin seleccionada
-  TimeOfDay? _selectedStartTime; // Variable para almacenar la hora de inicio seleccionada
-  TimeOfDay? _selectedEndTime; // Variable para almacenar la hora de fin seleccionada
+final firebase = FirebaseFirestore.instance;
 
+class _Crear_EventoState extends State<Crear_Evento> {
+  TextEditingController _nombreEventoController = TextEditingController();
+  TextEditingController _boletosDisponiblesController = TextEditingController();
+  TextEditingController _precioAdultoController = TextEditingController();
+  TextEditingController _precioNinoController = TextEditingController();
+  TextEditingController _precioSeniorController = TextEditingController();
+  TextEditingController _descripcionController = TextEditingController();
+  DateTime? _selectedStartDate;
+  DateTime? _selectedEndDate;
+  TimeOfDay? _selectedStartTime;
+  TimeOfDay? _selectedEndTime;
+  File? _selectedImage;
 
   Future<void> _selectImage() async {
     final picker = ImagePicker();
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
-      // Aquí puedes manejar la imagen seleccionada, como mostrarla en la interfaz de usuario o guardarla
-      print('Imagen seleccionada: ${pickedImage.path}');
+      setState(() {
+        _selectedImage = File(pickedImage.path);
+      });
     }
   }
 
+  Future<void> _guardarEvento() async {
+    try {
+      String imageUrl = await _uploadImageToStorage();
 
+      await firebase.collection('Eventos').add({
+        'usuarioId': widget.usuario?.uid,
+        'nombre': _nombreEventoController.text,
+        'boletosDisponibles': int.parse(_boletosDisponiblesController.text),
+        'precioAdulto': double.parse(_precioAdultoController.text),
+        'precioNino': double.parse(_precioNinoController.text),
+        'precioSenior': double.parse(_precioSeniorController.text),
+        'descripcion': _descripcionController.text,
+        'fechaInicio': _selectedStartDate,
+        'fechaFin': _selectedEndDate,
+        'horaInicio': _selectedStartTime,
+        'horaFin': _selectedEndTime,
+        'imagenUrl': imageUrl,
+      });
 
+      // Puedes agregar lógica adicional aquí, como mostrar un mensaje de éxito
+    } catch (e) {
+      print('Error al guardar el evento: $e');
+    }
+  }
+
+  Future<String> _uploadImageToStorage() async {
+    try {
+      if (_selectedImage != null) {
+        Reference ref = FirebaseStorage.instance.ref().child('Eventos').child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+        UploadTask uploadTask = ref.putFile(_selectedImage!);
+        await uploadTask.whenComplete(() => null);
+        String imageUrl = await ref.getDownloadURL();
+        return imageUrl;
+      } else {
+        return '';
+      }
+    } catch (e) {
+      print('Error al subir la imagen: $e');
+      return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +113,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                     ),
                     SizedBox(height: 10),
                     Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 60,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 60),
                       child: Row(
                         children: [
                           Text(
@@ -365,19 +403,20 @@ class _Crear_EventoState extends State<Crear_Evento> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: _selectImage, // Call _selectLocation instead of _selectImage
-                      child: Image.asset('lib/pantallas/Agregar_Ubicacion.png',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MapScreen()),
+                        );
+                      },
+                      child: Image.asset(
+                        'lib/pantallas/Agregar_Ubicacion.png',
                         width: 250,
                         height: 40,
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Tipo()),
-                        );
-                      },
+                      onTap: _guardarEvento,
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
                         width: 230,
@@ -393,7 +432,6 @@ class _Crear_EventoState extends State<Crear_Evento> {
       ),
     );
   }
-
 
   @override
   void dispose() {

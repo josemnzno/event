@@ -28,16 +28,29 @@ class _Crear_cuentaState extends State<Crear_cuenta> {
   String? _lastNameErrorText;
   String? _confirmEmailErrorText;
 
-  Future<void> registroUsuario() async {
+  Future<void> registrarUsuarioYDatos() async {
     try {
+      // Crear el usuario en Firebase Auth
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-
         email: _emailController.text,
         password: _passwordController.text,
-
       );
-      // Usuario registrado correctamente
 
+      // Usuario registrado correctamente en Firebase Auth
+      print('Usuario registrado correctamente en Firebase Auth: ${userCredential.user?.uid}');
+
+      // Registrar los datos del usuario en Cloud Firestore
+      await firabase.collection('User').doc(userCredential.user?.uid).set(
+        {
+          "Nombres": _firstNameController.text,
+          "Apellidos": _lastNameController.text,
+          "Email": _emailController.text,
+          "Telefono": _phoneController.text,
+        },
+      );
+
+      // Datos del usuario registrados correctamente en Cloud Firestore
+      print('Datos del usuario registrados correctamente en Cloud Firestore');
 
       // Aquí puedes agregar lógica adicional, como redireccionar a otra pantalla, mostrar un mensaje de éxito, etc.
     } catch (e) {
@@ -46,24 +59,8 @@ class _Crear_cuentaState extends State<Crear_cuenta> {
       // Aquí puedes manejar el error de registro, por ejemplo, mostrar un mensaje de error al usuario
     }
   }
-  registroDatosUsuario()async{
-    try{
-      await firabase.collection('User').doc().set(
-          {
-            "Nombres":_firstNameController.text,
-            "Apellidos":_lastNameController.text,
-            "Email":_emailController.text,
-            "Telefono":_phoneController.text,
 
-          }
-      );
 
-    }catch(e){
-      print("error......"+e.toString());
-
-    }
-
-  }
 
 
   @override
@@ -280,9 +277,8 @@ class _Crear_cuentaState extends State<Crear_cuenta> {
                     },
                   );
                 } else {
-                  // Todos los campos están completos, puedes proceder con la creación de la cuenta
-                  registroUsuario();
-                  registroDatosUsuario();// Llamar al método registroUsuario() aquí
+                  registrarUsuarioYDatos();
+                  // Llamar al método registroUsuario() aquí
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Cuenta creada con éxito'),

@@ -2,6 +2,7 @@ import 'package:event/Crear_Evento.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class Tipo extends StatefulWidget {
   const Tipo({Key? key}) : super(key: key);
 
@@ -132,8 +133,10 @@ class _TipoState extends State<Tipo> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Crear_Evento()),
+                            builder: (context) => Crear_Evento(usuario: FirebaseAuth.instance.currentUser),
+                          ),
                         );
+
                       },
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
