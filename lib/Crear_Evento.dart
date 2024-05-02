@@ -42,9 +42,17 @@ class _Crear_EventoState extends State<Crear_Evento> {
     }
   }
 
+  String _formatTimeOfDay(TimeOfDay timeOfDay) {
+    final String hour = timeOfDay.hour.toString().padLeft(2, '0');
+    final String minute = timeOfDay.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
   Future<void> _guardarEvento() async {
     try {
       String imageUrl = await _uploadImageToStorage();
+      String horaInicio = _selectedStartTime != null ? _formatTimeOfDay(_selectedStartTime!) : '';
+      String horaFin = _selectedEndTime != null ? _formatTimeOfDay(_selectedEndTime!) : '';
 
       await firebase.collection('Eventos').add({
         'usuarioId': widget.usuario?.uid,
@@ -56,16 +64,18 @@ class _Crear_EventoState extends State<Crear_Evento> {
         'descripcion': _descripcionController.text,
         'fechaInicio': _selectedStartDate,
         'fechaFin': _selectedEndDate,
-        'horaInicio': _selectedStartTime,
-        'horaFin': _selectedEndTime,
+        'horaInicio': horaInicio,
+        'horaFin': horaFin,
         'imagenUrl': imageUrl,
       });
 
-      // Puedes agregar lógica adicional aquí, como mostrar un mensaje de éxito
+      // Mostrar el cuadro de diálogo de evento creado exitoso
+      _mostrarDialogoEventoCreado();
     } catch (e) {
       print('Error al guardar el evento: $e');
     }
   }
+
 
   Future<String> _uploadImageToStorage() async {
     try {
@@ -432,6 +442,29 @@ class _Crear_EventoState extends State<Crear_Evento> {
       ),
     );
   }
+  void _mostrarDialogoEventoCreado() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Evento creado con éxito"),
+          content: Text("El evento se ha guardado correctamente."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Cerrar el cuadro de diálogo
+                Navigator.of(context).pop();
+                // Regresar a la pantalla del menú
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: Text("Aceptar"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   void dispose() {
