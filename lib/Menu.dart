@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event/Crear_Evento.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,26 +10,48 @@ class Tipo extends StatefulWidget {
   @override
   _TipoState createState() => _TipoState();
 }
-
 class _TipoState extends State<Tipo> {
   TextEditingController _searchController = TextEditingController();
-  List<String> _events = [
-    'Evento 1',
-    'Evento 2',
-    'Evento 3',
-    'Otro evento 1',
-    'Otro evento 2',
-    'Otro evento 3',
-  ];
+  List<String> _events = []; // Lista dinámica para almacenar los eventos
   List<String> _filteredEvents = [];
-  String _nombreUsuario = ""; // Variable para almacenar el nombre del usuario
+  String _nombreUsuario = "";
 
   @override
   void initState() {
     super.initState();
-    _filteredEvents.addAll(_events);
-    _getUserDisplayName(); // Obtener el nombre del usuario al iniciar la aplicación
+    _getUserDisplayName();
+    _updateEventsList(); // Obtener la lista de eventos al iniciar la aplicación
   }
+
+  // Método para obtener la lista de eventos
+  Future<void> _updateEventsList() async {
+    List<String> eventosDesdeFirestore = await obtenerEventosDesdeFirestore();
+    setState(() {
+      _events = eventosDesdeFirestore;
+      _filteredEvents = List.from(_events);
+    });
+  }
+
+  Future<List<String>> obtenerEventosDesdeFirestore() async {
+    List<String> eventos = [];
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Eventos').get();
+      querySnapshot.docs.forEach((doc) {
+        var data = doc.data() as Map<String, dynamic>?; // Convertir a Map<String, dynamic>
+        if (data != null) {
+          var nombre = data['nombre'] as String?; // Acceder a 'nombre' y convertir a String
+          if (nombre != null) {
+            eventos.add(nombre);
+          }
+        }
+      });
+
+    } catch (e) {
+      print('Error al obtener eventos desde Firestore: $e');
+    }
+    return eventos;
+  }
+
 
   void _filterEvents(String searchText) {
     setState(() {
@@ -43,36 +66,13 @@ class _TipoState extends State<Tipo> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       setState(() {
-        _nombreUsuario = user.displayName ?? ""; // Obtener el nombre del usuario
+        _nombreUsuario = user.displayName ?? "";
       });
     }
   }
 
   void _showUserMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('Mi cuenta'),
-                onTap: () {
-                  // Acción al seleccionar "Mi cuenta"
-                },
-              ),
-              ListTile(
-                title: Text('Cerrar sesión'),
-                onTap: () {
-                  // Acción al seleccionar cerrar sesión
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    // Implementación del menú de usuario
   }
 
   @override
@@ -129,23 +129,24 @@ class _TipoState extends State<Tipo> {
                     ),
                     SizedBox(height: 10),
                     InkWell(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        // Espera a que se complete la creación del evento
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => Crear_Evento(usuario: FirebaseAuth.instance.currentUser),
                           ),
                         );
 
+                        // Actualiza la lista de eventos después de crear un evento
+                        _updateEventsList();
                       },
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
                         width: 220,
                       ),
                     ),
-                    SizedBox(
-                        height:
-                        10), // Añadido espacio entre el botón y el cuadro "Eventos"
+                    SizedBox(height: 10), // Espacio entre el botón y la lista de eventos
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 10),
                       child: Text(
@@ -191,8 +192,7 @@ class _TipoState extends State<Tipo> {
                   onPressed: () {
                     _showUserMenu(context);
                   },
-                  icon: Icon(Icons.account_circle,
-                      size: 40), // Icono de usuario más grande
+                  icon: Icon(Icons.account_circle, size: 40),
                 ),
               ],
             ),

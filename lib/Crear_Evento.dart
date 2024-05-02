@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:event/Menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -455,7 +456,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
                 // Cerrar el cuadro de diálogo
                 Navigator.of(context).pop();
                 // Regresar a la pantalla del menú
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Tipo()));
               },
               child: Text("Aceptar"),
             ),
@@ -464,6 +465,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
       },
     );
   }
+
 
 
   @override
