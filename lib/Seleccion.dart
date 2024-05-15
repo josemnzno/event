@@ -74,8 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 50),
             GestureDetector(
               onTap: () {
-                // Acción a realizar cuando se toca la imagen
-                print('Imagen seleccionada');
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Inicio()),

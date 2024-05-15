@@ -1,96 +1,236 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:event/CompraBoletosScreen.dart'; // Importa la pantalla de compra de boletos
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
-class DetalleEvento extends StatelessWidget {
+// Modelo de datos para el evento
+class Evento {
+  final String nombre;
+  final String descripcion;
+  final DateTime fechaInicio;
+  final DateTime fechaFin;
+  final String horaInicio;
+  final String horaFin;
+  final double precioAdulto;
+  final double precioNino;
+  final double precioSenior;
+  final int boletosDisponibles;
+  final String imagenUrl;
+  final GeoPoint ubicacion;
+
+  Evento({
+    required this.nombre,
+    required this.descripcion,
+    required this.fechaInicio,
+    required this.fechaFin,
+    required this.horaInicio,
+    required this.horaFin,
+    required this.precioAdulto,
+    required this.precioNino,
+    required this.precioSenior,
+    required this.boletosDisponibles,
+    required this.imagenUrl,
+    required this.ubicacion,
+  });
+}
+class DetalleEvento extends StatefulWidget {
   final QueryDocumentSnapshot evento;
 
   const DetalleEvento({Key? key, required this.evento}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    Map<String, dynamic> data = evento.data() as Map<String, dynamic>;
+  _DetalleEventoState createState() => _DetalleEventoState();
+}
 
-    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-    String fechaInicio = dateFormat.format(data['fechaInicio'].toDate());
-    String fechaFin = dateFormat.format(data['fechaFin'].toDate());
+class _DetalleEventoState extends State<DetalleEvento> {
+  late int cantidadAdultos;
+  late int cantidadNinos;
+  late int cantidadSeniors;
+  late String imageUrl;
+  late Evento evento; // Definir el parámetro evento
 
-    // Extraer las coordenadas de ubicación
+  @override
+  void initState() {
+    super.initState();
+    cantidadAdultos = 0;
+    cantidadNinos = 0;
+    cantidadSeniors = 0;
+    imageUrl = widget.evento['imagenUrl'];
+    // Crear objeto Evento con la información del documento
+    Map<String, dynamic> data = widget.evento.data() as Map<String, dynamic>;
+    DateTime fechaInicio = data['fechaInicio'].toDate();
+    DateTime fechaFin = data['fechaFin'].toDate();
     GeoPoint ubicacion = data['ubicacion'];
 
+    evento = Evento(
+      nombre: data['nombre'],
+      descripcion: data['descripcion'],
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+      horaInicio: data['horaInicio'],
+      horaFin: data['horaFin'],
+      precioAdulto: data['precioAdulto'],
+      precioNino: data['precioNino'],
+      precioSenior: data['precioSenior'],
+      boletosDisponibles: data['boletosDisponibles'],
+      imagenUrl: data['imagenUrl'],
+      ubicacion: data['ubicacion'],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: MediaQuery.of(context).size.width, // Establecer el ancho igual al ancho del dispositivo
+        width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('lib/pantallas/fondo2.png'),
-            fit: BoxFit.fill, // Cambiado a BoxFit.fill
+            fit: BoxFit.fill,
           ),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height:65),
-                    Text(
-                      'Informacion',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    _buildText('Evento: ${data['nombre']}'),
-                    _buildText('Descripción: ${data['descripcion']}'),
-                    _buildText('Inicio: $fechaInicio - ${data['horaInicio']}'),
-                    _buildText('Fin: $fechaFin - ${data['horaFin']} '),
-                    _buildText('Precio Adulto: \$${data['precioAdulto']}'),
-                    _buildText('Precio Niño:\$${data['precioNino']} '),
-                    _buildText('Precio Senior: \$${data['precioSenior']}'),
-                    // Mostrar las coordenadas de ubicación como texto
-                    SizedBox(height: 10),
-                    Text(
-                      'Ubicacion de el evento',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-
-                    // Widget para mostrar el mapa con la ubicación del evento
-                    Container(
-                      height: 300,
-                      width: double.infinity,
-                      child: GoogleMap(
-                        initialCameraPosition: CameraPosition(
-                          target: LatLng(ubicacion.latitude, ubicacion.longitude),
-                          zoom: 15,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 65),
+                      Text(
+                        'Informacion',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
-                        markers: Set.of([
-                          Marker(
-                            markerId: MarkerId('eventoLocation'),
-                            position: LatLng(ubicacion.latitude, ubicacion.longitude),
-                            infoWindow: InfoWindow(title: 'Ubicación del evento'),
-                          ),
-                        ]),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 20),
+                      _buildText('Evento: ${evento.nombre}'),
+                      _buildText('Descripción: ${evento.descripcion}'),
+                      _buildText('Inicio: ${DateFormat('dd/MM/yyyy').format(evento.fechaInicio)} - ${evento.horaInicio}'),
+                      _buildText('Fin: ${DateFormat('dd/MM/yyyy').format(evento.fechaFin)} - ${evento.horaFin} '),
+                      _buildText('Precio Adulto: \$${evento.precioAdulto}'),
+                      _buildText('Precio Niño: \$${evento.precioNino}'),
+                      _buildText('Precio Senior: \$${evento.precioSenior}'),
+                      _buildText('Boletos disponibles: ${evento.boletosDisponibles}'),
+                      SizedBox(height: 10),
+                      Text(
+                        'Imagen de el evento',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Image.network(
+                        imageUrl,
+                        width: 350,
+                        height: 300,
+                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          } else {
+                            return CircularProgressIndicator();
+                          }
+                        },
+                        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                          return Text('Error al cargar la imagen');
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Ubicación del evento',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Container(
+                        height: 300,
+                        width: double.infinity,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(evento.ubicacion.latitude, evento.ubicacion.longitude),
+                            zoom: 15,
+                          ),
+                          markers: Set.of([
+                            Marker(
+                              markerId: MarkerId('eventoLocation'),
+                              position: LatLng(evento.ubicacion.latitude, evento.ubicacion.longitude),
+                              infoWindow: InfoWindow(title: 'Ubicación del evento'),
+                            ),
+                          ]),
+                        ),
+                      ),
+                      _buildCantidadBoletos('Adultos', cantidadAdultos, (value) {
+                        setState(() {
+                          cantidadAdultos = int.parse(value);
+                        });
+                      }),
+                      _buildCantidadBoletos('Niños', cantidadNinos, (value) {
+                        setState(() {
+                          cantidadNinos = int.parse(value);
+                        });
+                      }),
+                      _buildCantidadBoletos('Seniors', cantidadSeniors, (value) {
+                        setState(() {
+                          cantidadSeniors = int.parse(value);
+                        });
+                      }),
+                      _buildText('Total: \$${_calcularTotal().toStringAsFixed(2)}'),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetalleCompraScreen(
+                                total: _calcularTotal(),
+                                cantidadAdultos: cantidadAdultos,
+                                cantidadNinos: cantidadNinos,
+                                cantidadSeniors: cantidadSeniors,
+                                evento: evento, // Pasar el objeto Evento
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text('Comprar'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCantidadBoletos(String label, int cantidad, void Function(String) onChanged) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          label + ': ',
+          style: TextStyle(fontSize: 20),
+        ),
+        SizedBox(width: 10),
+        SizedBox(
+          width: 50,
+          child: TextFormField(
+            initialValue: cantidad.toString(),
+            keyboardType: TextInputType.number,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
     );
   }
 
@@ -100,7 +240,12 @@ class DetalleEvento extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(fontSize: 20, color: Colors.black),
+        textAlign: TextAlign.center, // Alinea el texto al centro
       ),
     );
+  }
+
+  double _calcularTotal() {
+    return (cantidadAdultos * evento.precioAdulto) + (cantidadNinos * evento.precioNino) + (cantidadSeniors * evento.precioSenior);
   }
 }

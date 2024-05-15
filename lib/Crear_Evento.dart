@@ -47,6 +47,20 @@ class _Crear_EventoState extends State<Crear_Evento> {
       });
     }
   }
+  bool _checkCamposCompletos() {
+    return _nombreEventoController.text.isNotEmpty &&
+        _selectedStartDate != null &&
+        _selectedEndDate != null &&
+        _selectedStartTime != null &&
+        _selectedEndTime != null &&
+        _boletosDisponiblesController.text.isNotEmpty &&
+        _precioAdultoController.text.isNotEmpty &&
+        _precioNinoController.text.isNotEmpty &&
+        _precioSeniorController.text.isNotEmpty &&
+        _descripcionController.text.isNotEmpty &&
+        _selectedImage != null &&
+        _selectedLocation != null;
+  }
 
   String _formatTimeOfDay(TimeOfDay timeOfDay) {
     final String hour = timeOfDay.hour.toString().padLeft(2, '0');
@@ -453,7 +467,6 @@ class _Crear_EventoState extends State<Crear_Evento> {
                     height: 40,
                   ),
                 ),
-                    // Resto del contenido de la pantalla...
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -468,11 +481,12 @@ class _Crear_EventoState extends State<Crear_Evento> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: _isButtonEnabled ? _guardarEvento : null, // Deshabilitar el botón si _isButtonEnabled es false
+                      onTap: _checkCamposCompletos() ? _guardarEvento : null, // Verifica si los campos están completos antes de llamar a _guardarEvento
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
                         width: 230,
                         height: 65,
+                        color: _checkCamposCompletos() ? null : Colors.greenAccent, // Cambia el color a gris si los campos no están completos
                       ),
                     ),
                   ],
