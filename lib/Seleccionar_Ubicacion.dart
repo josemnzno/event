@@ -5,7 +5,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  final void Function(String) onGuardarUbicacion; // Función de devolución de llamada para guardar la ubicación
+
+  const MapScreen({Key? key, required this.onGuardarUbicacion}) : super(key: key);
 
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -147,10 +149,21 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _confirmLocation() {
+  // Método para guardar la ubicación seleccionada y llamar a la función de devolución de llamada
+  // Método para guardar la ubicación seleccionada y llamar a la función de devolución de llamada
+  void guardarUbicacionSeleccionada() {
     if (_selectedLocation != null) {
-      Navigator.pop(
-          context, _selectedLocation); // Pasar la ubicación seleccionada de regreso a la pantalla anterior
+      // Convertir las coordenadas de la ubicación a una cadena
+      String ubicacionString = "${_selectedLocation!.latitude},${_selectedLocation!.longitude}";
+      // Llamar a la función de devolución de llamada para guardar la ubicación
+      widget.onGuardarUbicacion(ubicacionString);
     }
+  }
+
+
+  void _confirmLocation() {
+    // Llamar al método para guardar la ubicación seleccionada
+    guardarUbicacionSeleccionada();
+    Navigator.pop(context); // Regresar a la pantalla anterior después de guardar la ubicación
   }
 }

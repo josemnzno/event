@@ -17,7 +17,7 @@ class Inicio extends StatelessWidget {
         email: email,
         password: password,
       );
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Tipo()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => EventosScreen()));
     } catch (e) {
       // Handle errors aquí
       print("Error: $e");

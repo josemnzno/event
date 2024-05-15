@@ -1,40 +1,54 @@
-import 'package:event/Crear_Evento.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event/DetalleEvento.dart';
+import 'package:intl/intl.dart'; // Importa la clase DateFormat
 
+import 'Crear_Evento.dart'; // Importa la pantalla de detalles del evento
 
-class Tipo extends StatefulWidget {
-  const Tipo({Key? key}) : super(key: key);
+class EventosScreen extends StatefulWidget {
+  const EventosScreen({Key? key}) : super(key: key);
 
   @override
-  _TipoState createState() => _TipoState();
+  _EventosScreenState createState() => _EventosScreenState();
 }
 
-class _TipoState extends State<Tipo> {
+class _EventosScreenState extends State<EventosScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<String> _events = [
-    'Evento 1',
-    'Evento 2',
-    'Evento 3',
-    'Otro evento 1',
-    'Otro evento 2',
-    'Otro evento 3',
-  ];
-  List<String> _filteredEvents = [];
-  String _nombreUsuario = ""; // Variable para almacenar el nombre del usuario
+  List<QueryDocumentSnapshot> _eventos = []; // Lista para almacenar los eventos
+  List<QueryDocumentSnapshot> _filteredEventos = []; // Lista filtrada de eventos
+  String _nombreUsuario = "";
 
   @override
   void initState() {
     super.initState();
-    _filteredEvents.addAll(_events);
-    _getUserDisplayName(); // Obtener el nombre del usuario al iniciar la aplicación
+    _getUserDisplayName();
+    _updateEventsList();
+  }
+
+  Future<void> _updateEventsList() async {
+    List<QueryDocumentSnapshot> eventosDesdeFirestore = await obtenerEventosDesdeFirestore();
+    setState(() {
+      _eventos = eventosDesdeFirestore;
+      _filteredEventos = List.from(_eventos);
+    });
+  }
+
+  Future<List<QueryDocumentSnapshot>> obtenerEventosDesdeFirestore() async {
+    List<QueryDocumentSnapshot> eventos = [];
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Eventos').get();
+      eventos = querySnapshot.docs;
+    } catch (e) {
+      print('Error al obtener eventos desde Firestore: $e');
+    }
+    return eventos;
   }
 
   void _filterEvents(String searchText) {
     setState(() {
-      _filteredEvents = _events
-          .where((event) =>
-          event.toLowerCase().contains(searchText.toLowerCase()))
+      _filteredEventos = _eventos
+          .where((event) => event['nombre'].toString().toLowerCase().contains(searchText.toLowerCase()))
           .toList();
     });
   }
@@ -43,36 +57,13 @@ class _TipoState extends State<Tipo> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       setState(() {
-        _nombreUsuario = user.displayName ?? ""; // Obtener el nombre del usuario
+        _nombreUsuario = user.displayName ?? "";
       });
     }
   }
 
   void _showUserMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('Mi cuenta'),
-                onTap: () {
-                  // Acción al seleccionar "Mi cuenta"
-                },
-              ),
-              ListTile(
-                title: Text('Cerrar sesión'),
-                onTap: () {
-                  // Acción al seleccionar cerrar sesión
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    // Implementa el menú de usuario aquí
   }
 
   @override
@@ -118,8 +109,7 @@ class _TipoState extends State<Tipo> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(50),
                                 ),
-                                contentPadding: EdgeInsets.symmetric(
-                                    vertical: 15, horizontal: 20),
+                                contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                               ),
                               onChanged: _filterEvents,
                             ),
@@ -129,23 +119,25 @@ class _TipoState extends State<Tipo> {
                     ),
                     SizedBox(height: 10),
                     InkWell(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        // Espera a que se complete la creación del evento
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Crear_Evento(usuario: FirebaseAuth.instance.currentUser),
+                            builder: (context) => Crear_Evento(
+                                usuario: FirebaseAuth.instance.currentUser),
                           ),
                         );
 
+                        // Actualiza la lista de eventos después de crear un evento
+                        _updateEventsList();
                       },
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
                         width: 220,
                       ),
                     ),
-                    SizedBox(
-                        height:
-                        10), // Añadido espacio entre el botón y el cuadro "Eventos"
+                    SizedBox(height: 10),
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 10),
                       child: Text(
@@ -156,21 +148,52 @@ class _TipoState extends State<Tipo> {
                         ),
                       ),
                     ),
-                    // Espacio adicional entre el botón y el ListView
                     Expanded(
                       child: ListView.builder(
-                        itemCount: _filteredEvents.length,
+                        itemCount: _filteredEventos.length,
                         itemBuilder: (context, index) {
+                          var evento = _filteredEventos[index];
+                          // Formatear la fecha utilizando DateFormat
+                          var fechaInicio = DateFormat('dd/MM/yyyy').format(evento['fechaInicio'].toDate());
+
                           return Card(
+                            color: Colors.greenAccent[100], // Color de fondo del rectángulo
                             child: ListTile(
-                              title: Text(_filteredEvents[index]),
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    evento['nombre'].toString(),
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black, // Color del texto
+                                    ),
+                                  ),
+                                  Text(
+                                    fechaInicio,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black, // Color del texto
+                                    ),
+                                  ),
+                                ],
+                              ),
                               onTap: () {
-                                // Acción al hacer clic en el evento
+                                // Navegar a la pantalla de detalles del evento y pasar el documento completo del evento
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DetalleEvento(evento: evento),
+                                  ),
+                                );
                               },
                             ),
                           );
                         },
                       ),
+
+
                     ),
                   ],
                 ),
@@ -191,8 +214,7 @@ class _TipoState extends State<Tipo> {
                   onPressed: () {
                     _showUserMenu(context);
                   },
-                  icon: Icon(Icons.account_circle,
-                      size: 40), // Icono de usuario más grande
+                  icon: Icon(Icons.account_circle, size: 40),
                 ),
               ],
             ),
