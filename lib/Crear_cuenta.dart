@@ -278,7 +278,6 @@ class _Crear_cuentaState extends State<Crear_cuenta> {
                   );
                 } else {
                   registrarUsuarioYDatos();
-                  // Llamar al método registroUsuario() aquí
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Cuenta creada con éxito'),

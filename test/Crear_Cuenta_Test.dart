@@ -5,26 +5,83 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:event/Crear_cuenta.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:event/main.dart';
+Future<void> initializeFirebase() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+}
 
-void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget( MyApp());
+Future<void> main() async {
+  await initializeFirebase();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  group('UI Render Tests', () {
+    testWidgets('Initial UI elements are displayed correctly', (
+        WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      expect(find.text('NUEVO USUARIO'), findsOneWidget);
+      expect(find.byType(TextFormField), findsNWidgets(7));
+      expect(find.text('Crear cuenta'), findsOneWidget);
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('Valid Data tests', () {
+    testWidgets('Email validation error shown when email is invalid', (
+        WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
+
+      final emailField = find.byType(TextFormField).at(
+          3); // Assuming email field is the fourth TextFormField
+      await tester.enterText(emailField, 'invalid_email');
+      await tester.pump();
+
+      expect(find.text('Ingrese un correo electrónico válido'), findsOneWidget);
+    });
+
+    testWidgets(
+        'Password confirmation error shown when passwords do not match', (
+        WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
+
+      final passwordField = find.byType(TextFormField).at(
+          5); // Assuming password field is the sixth TextFormField
+      final confirmPasswordField = find.byType(TextFormField).at(
+          6); // Assuming confirm password field is the seventh TextFormField
+
+      await tester.enterText(passwordField, 'password123');
+      await tester.enterText(confirmPasswordField, 'differentPassword');
+      await tester.pump();
+
+      expect(find.text('Las contraseñas no coinciden'), findsOneWidget);
+    });
+
+    testWidgets('Phone validation error shown when phone number is invalid', (
+        WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
+
+      final phoneField = find.byType(TextFormField).at(
+          2); // Assuming phone field is the third TextFormField
+      await tester.enterText(phoneField, '123');
+      await tester.pump();
+
+      expect(find.text('El teléfono debe tener 10 números'), findsOneWidget);
+    });
+  });
+
+  group('Empty fields', () {
+    testWidgets('Form submission shows error when fields are empty', (
+        WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
+
+      await tester.tap(find.text('Crear cuenta'));
+      await tester.pump();
+
+      expect(
+          find.text('Por favor, complete todos los campos.'), findsOneWidget);
+    });
   });
 }
