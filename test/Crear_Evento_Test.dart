@@ -10,55 +10,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Initial UI elements are displayed correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Crear_Evento()));
+  group('Crear_Evento Widget Tests', () {
+    testWidgets('Widget Renders Correctly', (WidgetTester tester) async {
+      // Build our widget and trigger a frame.
+      await tester.pumpWidget(MaterialApp(
+        home: Crear_Evento(),
+      ));
 
-    expect(find.text('NUEVO USUARIO'), findsOneWidget);
-    expect(find.byType(TextFormField), findsNWidgets(7)); // Assuming 7 TextFormField widgets
-    expect(find.text('Crear cuenta'), findsOneWidget);
-  });
+      // Verify that the Create Event title is rendered
+      expect(find.text('Crear Evento'), findsOneWidget);
 
-  //Valid Data Tests
-  testWidgets('Email validation error shown when email is invalid', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Crear_Evento()));
+      // Verify that some specific widgets are rendered
+      expect(find.byType(TextFormField), findsNWidgets(6));
+      expect(find.byType(ElevatedButton), findsNWidgets(3)); // Adjusted to the number of ElevatedButtons in your widget
+      expect(find.byType(GestureDetector), findsNWidgets(3));
+      expect(find.byType(Image), findsNWidgets(3));
+    });
 
-    final emailField = find.byType(TextFormField).at(3); // Assuming email field is the fourth TextFormField
-    await tester.enterText(emailField, 'invalid_email');
-    await tester.pump();
+    testWidgets('Selecting Image', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Crear_Evento(),
+      ));
 
-    expect(find.text('Ingrese un correo electrónico válido'), findsOneWidget);
-  });
+      // Tap the image widget to select an image
+      await tester.tap(find.byType(GestureDetector).at(0));
+      await tester.pump();
 
-  testWidgets('Password confirmation error shown when passwords do not match', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Crear_Evento()));
+      // Here, you can add further expectations based on the behavior after selecting an image
+    });
 
-    final passwordField = find.byType(TextFormField).at(5); // Assuming password field is the sixth TextFormField
-    final confirmPasswordField = find.byType(TextFormField).at(6); // Assuming confirm password field is the seventh TextFormField
-
-    await tester.enterText(passwordField, 'password123');
-    await tester.enterText(confirmPasswordField, 'differentPassword');
-    await tester.pump();
-
-    expect(find.text('Las contraseñas no coinciden'), findsOneWidget);
-  });
-
-  testWidgets('Phone validation error shown when phone number is invalid', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Crear_Evento()));
-
-    final phoneField = find.byType(TextFormField).at(2); // Assuming phone field is the third TextFormField
-    await tester.enterText(phoneField, '123');
-    await tester.pump();
-
-    expect(find.text('El teléfono debe tener 10 números'), findsOneWidget);
-  });
-
-  //Empty fields
-  testWidgets('Form submission shows error when fields are empty', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Crear_Evento()));
-
-    await tester.tap(find.text('Crear cuenta'));
-    await tester.pump();
-
-    expect(find.text('Por favor, complete todos los campos.'), findsOneWidget);
+    // Add more tests for other functionalities like selecting location, saving event, etc.
   });
 }
