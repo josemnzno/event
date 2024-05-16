@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:event/DetalleEvento.dart'; // Importa la clase Evento
 import 'package:event/CompraExitosaScreen.dart'; // Importa la pantalla de compra exitosa
 import 'package:intl/intl.dart'; // Importa DateFormat
+import 'package:uuid/uuid.dart'; // Importa la librería uuid para generar ID único
 
 class DetalleCompraScreen extends StatelessWidget {
   final double total;
@@ -20,6 +21,9 @@ class DetalleCompraScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Genera un ID único para la compra del boleto
+    String codigoBoleto = Uuid().v4();
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -58,7 +62,8 @@ class DetalleCompraScreen extends StatelessWidget {
                           cantidadAdultos: cantidadAdultos,
                           cantidadNinos: cantidadNinos,
                           cantidadSeniors: cantidadSeniors,
-                          evento: evento, // Pasa el objeto Evento
+                          evento: evento,
+                          codigoBoleto: codigoBoleto, // Pasa el ID único de la compra
                         )),
                       );
                     },
@@ -75,6 +80,7 @@ class DetalleCompraScreen extends StatelessWidget {
                             cantidadNinos: cantidadNinos,
                             cantidadSeniors: cantidadSeniors,
                             evento: evento,
+                            codigoBoleto: codigoBoleto, // Pasa el ID único de la compra
                           ),
                         ),
                       );

@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "eventapp",
       debugShowCheckedModeBanner: false,
+      title: "eventapp",
       initialRoute: '/', // Ruta inicial
       routes: {
         '/': (context) => Seleccion(), // Asigna la pantalla de inicio a la ruta inicial

@@ -86,7 +86,7 @@ class _EventosScreenState extends State<EventosScreen> {
                   children: [
                     SizedBox(height: 70),
                     Text(
-                      'EventApp',
+                      'EcoTicket',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 40,

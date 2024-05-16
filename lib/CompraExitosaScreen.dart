@@ -1,11 +1,11 @@
+import 'package:event/InfomacionCompra.dart';
 import 'package:flutter/material.dart';
 import 'package:event/DetalleEvento.dart'; // Importa la clase Evento
 import 'package:intl/intl.dart'; // Importa DateFormat
 import 'package:uuid/uuid.dart'; // Importa la librería uuid para generar ID único
-import 'package:qr_flutter/qr_flutter.dart'; // Importa la librería qr_flutter para generar código QR
-
 class CompraExitosaScreen extends StatelessWidget {
   final Evento evento; // Objeto Evento en lugar de Map<String, dynamic>
+  final String codigoBoleto; // Define el parámetro codigoBoleto
 
   final double total;
   final int cantidadAdultos;
@@ -18,13 +18,11 @@ class CompraExitosaScreen extends StatelessWidget {
     required this.cantidadNinos,
     required this.cantidadSeniors,
     required this.evento, // Ajusta el parámetro para aceptar un objeto Evento
+    required this.codigoBoleto, // Agrega el parámetro codigoBoleto
   });
 
   @override
   Widget build(BuildContext context) {
-    // Genera un ID único para la compra del boleto
-    String compraId = Uuid().v4();
-
     // Accede a las propiedades del objeto evento directamente
     String eventName = evento.nombre;
     String eventDescription = evento.descripcion;
@@ -64,6 +62,22 @@ class CompraExitosaScreen extends StatelessWidget {
                     Text('Cantidad de Seniors: $cantidadSeniors', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
                     Text('Total: \$${total.toStringAsFixed(2)}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
                     SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => InformacionCompra(
+                            total: total,
+                            cantidadAdultos: cantidadAdultos,
+                            cantidadNinos: cantidadNinos,
+                            cantidadSeniors: cantidadSeniors,
+                            evento: evento, // Pasa el objeto Evento
+                            codigoBoleto: codigoBoleto, // Pasa el ID único de la compra
+                          )),
+                        );
+                      },
+                      child: Text('ver informacion de la compra', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
+                    ),
 
                     // Muestra el código QR basado en el ID único de la compra
                   ],
