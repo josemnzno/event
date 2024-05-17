@@ -15,42 +15,12 @@ class EventosScreen extends StatefulWidget {
 
 class _EventosScreenState extends State<EventosScreen> {
   TextEditingController _searchController = TextEditingController();
-  List<QueryDocumentSnapshot> _eventos = []; // Lista para almacenar los eventos
-  List<QueryDocumentSnapshot> _filteredEventos = []; // Lista filtrada de eventos
   String _nombreUsuario = "";
 
   @override
   void initState() {
     super.initState();
     _getUserDisplayName();
-    _updateEventsList();
-  }
-
-  Future<void> _updateEventsList() async {
-    List<QueryDocumentSnapshot> eventosDesdeFirestore = await obtenerEventosDesdeFirestore();
-    setState(() {
-      _eventos = eventosDesdeFirestore;
-      _filteredEventos = List.from(_eventos);
-    });
-  }
-
-  Future<List<QueryDocumentSnapshot>> obtenerEventosDesdeFirestore() async {
-    List<QueryDocumentSnapshot> eventos = [];
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Eventos').get();
-      eventos = querySnapshot.docs;
-    } catch (e) {
-      print('Error al obtener eventos desde Firestore: $e');
-    }
-    return eventos;
-  }
-
-  void _filterEvents(String searchText) {
-    setState(() {
-      _filteredEventos = _eventos
-          .where((event) => event['nombre'].toString().toLowerCase().contains(searchText.toLowerCase()))
-          .toList();
-    });
   }
 
   Future<void> _getUserDisplayName() async {
@@ -125,12 +95,13 @@ class _EventosScreenState extends State<EventosScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Crear_Evento(
-                                usuario: FirebaseAuth.instance.currentUser),
+                              usuario: FirebaseAuth.instance.currentUser,
+                            ),
                           ),
                         );
 
                         // Actualiza la lista de eventos después de crear un evento
-                        _updateEventsList();
+                        setState(() {}); // Forzar la reconstrucción del widget para actualizar la lista
                       },
                       child: Image.asset(
                         'lib/pantallas/Crear_Evento.png',
@@ -149,51 +120,62 @@ class _EventosScreenState extends State<EventosScreen> {
                       ),
                     ),
                     Expanded(
-                      child: ListView.builder(
-                        itemCount: _filteredEventos.length,
-                        itemBuilder: (context, index) {
-                          var evento = _filteredEventos[index];
-                          // Formatear la fecha utilizando DateFormat
-                          var fechaInicio = DateFormat('dd/MM/yyyy').format(evento['fechaInicio'].toDate());
-
-                          return Card(
-                            color: Colors.greenAccent[100], // Color de fondo del rectángulo
-                            child: ListTile(
-                              title: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    evento['nombre'].toString(),
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black, // Color del texto
-                                    ),
+                      child: StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance.collection('Eventos').snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator()); // Muestra un indicador de carga mientras se espera la respuesta de Firestore
+                          }
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+                          // Filtra los eventos si hay un texto de búsqueda
+                          List<QueryDocumentSnapshot> filteredEventos = snapshot.data!.docs.where((evento) {
+                            String nombreEvento = evento['nombre'].toString().toLowerCase();
+                            return nombreEvento.contains(_searchController.text.toLowerCase());
+                          }).toList();
+                          return ListView.builder(
+                            itemCount: filteredEventos.length,
+                            itemBuilder: (context, index) {
+                              var evento = filteredEventos[index];
+                              var fechaInicio = DateFormat('dd/MM/yyyy').format(evento['fechaInicio'].toDate());
+                              return Card(
+                                color: Colors.greenAccent[100],
+                                child: ListTile(
+                                  title: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        evento['nombre'].toString(),
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      Text(
+                                        fechaInicio,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    fechaInicio,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black, // Color del texto
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                // Navegar a la pantalla de detalles del evento y pasar el documento completo del evento
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetalleEvento(evento: evento),
-                                  ),
-                                );
-                              },
-                            ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetalleEvento(evento: evento),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
-
-
                     ),
                   ],
                 ),
@@ -222,5 +204,11 @@ class _EventosScreenState extends State<EventosScreen> {
         ],
       ),
     );
+  }
+
+  void _filterEvents(String searchText) {
+    setState(() {
+      // No es necesario filtrar aquí ya que el StreamBuilder lo hace automáticamente
+    });
   }
 }

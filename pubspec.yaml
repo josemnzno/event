@@ -47,6 +47,9 @@ dependencies:
   google_places_autocomplete_flutter: ^1.0.6
   firebase_storage: ^11.7.4
   qr_flutter: ^4.0.1
+  flutter_email_sender: ^6.0.3
+
+
 
 
 

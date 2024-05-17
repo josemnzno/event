@@ -34,6 +34,7 @@ class Evento {
     required this.ubicacion,
   });
 }
+
 class DetalleEvento extends StatefulWidget {
   final QueryDocumentSnapshot evento;
 
@@ -79,6 +80,10 @@ class _DetalleEventoState extends State<DetalleEvento> {
     );
   }
 
+  bool _haySuficientesBoletos() {
+    int totalBoletosSeleccionados = cantidadAdultos + cantidadNinos + cantidadSeniors;
+    return totalBoletosSeleccionados <= evento.boletosDisponibles;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,7 +191,7 @@ class _DetalleEventoState extends State<DetalleEvento> {
                       }),
                       _buildText('Total: \$${_calcularTotal().toStringAsFixed(2)}'),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: _haySuficientesBoletos() ? () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -196,12 +201,18 @@ class _DetalleEventoState extends State<DetalleEvento> {
                                 cantidadNinos: cantidadNinos,
                                 cantidadSeniors: cantidadSeniors,
                                 evento: evento, // Pasar el objeto Evento
+                                boletosDisponibles: evento.boletosDisponibles, // Pasar boletos disponibles
                               ),
                             ),
                           );
-                        },
+                        } : null,
                         child: Text('Comprar'),
                       ),
+                      if (!_haySuficientesBoletos())
+                        Text(
+                          'No hay suficientes boletos disponibles',
+                          style: TextStyle(color: Colors.red, fontSize: 16),
+                        ),
                     ],
                   ),
                 ),

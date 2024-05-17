@@ -9,15 +9,18 @@ class DetalleCompraScreen extends StatelessWidget {
   final int cantidadAdultos;
   final int cantidadNinos;
   final int cantidadSeniors;
-  final Evento evento; // Modifica el tipo de dato de eventData a Evento
+  final Evento evento;
+  final int boletosDisponibles;
 
-  DetalleCompraScreen({
+  const DetalleCompraScreen({
+    Key? key,
     required this.total,
     required this.cantidadAdultos,
     required this.cantidadNinos,
     required this.cantidadSeniors,
-    required this.evento, // Actualiza el parámetro
-  });
+    required this.evento,
+    required this.boletosDisponibles,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

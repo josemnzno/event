@@ -1,8 +1,9 @@
-import 'package:event/InfomacionCompra.dart';
 import 'package:flutter/material.dart';
 import 'package:event/DetalleEvento.dart'; // Importa la clase Evento
-import 'package:intl/intl.dart'; // Importa DateFormat
-import 'package:uuid/uuid.dart'; // Importa la librería uuid para generar ID único
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'InfomacionCompra.dart'; // Importa Firestore
+
 class CompraExitosaScreen extends StatelessWidget {
   final Evento evento; // Objeto Evento en lugar de Map<String, dynamic>
   final String codigoBoleto; // Define el parámetro codigoBoleto
@@ -23,11 +24,6 @@ class CompraExitosaScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Accede a las propiedades del objeto evento directamente
-    String eventName = evento.nombre;
-    String eventDescription = evento.descripcion;
-    String eventDate = DateFormat('dd/MM/yyyy').format(evento.fechaInicio);
-
     return Scaffold(
       body: Stack(
         children: [
@@ -54,9 +50,8 @@ class CompraExitosaScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 25),
-                    Text('Evento: $eventName', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
-                    Text('Descripción: $eventDescription', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal,),textAlign: TextAlign.center),
-                    Text('Fecha: $eventDate', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
+                    Text('Evento: ${evento.nombre}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
+                    Text('Descripción: ${evento.descripcion}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal,),textAlign: TextAlign.center),
                     Text('Cantidad de Adultos: $cantidadAdultos', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
                     Text('Cantidad de Niños: $cantidadNinos', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
                     Text('Cantidad de Seniors: $cantidadSeniors', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
@@ -64,22 +59,49 @@ class CompraExitosaScreen extends StatelessWidget {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => InformacionCompra(
-                            total: total,
-                            cantidadAdultos: cantidadAdultos,
-                            cantidadNinos: cantidadNinos,
-                            cantidadSeniors: cantidadSeniors,
-                            evento: evento, // Pasa el objeto Evento
-                            codigoBoleto: codigoBoleto, // Pasa el ID único de la compra
-                          )),
-                        );
+                        // Actualizar el campo "boletosDisponibles" en Firestore
+                        FirebaseFirestore.instance
+                            .collection('Eventos')
+                            .where('nombre', isEqualTo: evento.nombre)
+                            .get()
+                            .then((querySnapshot) {
+                          if (querySnapshot.docs.isNotEmpty) {
+                            // Si se encuentra un evento con el mismo nombre
+                            final eventoDoc = querySnapshot.docs.first;
+                            final boletosDisponiblesActual = eventoDoc['boletosDisponibles'];
+                            final nuevosBoletosDisponibles = boletosDisponiblesActual - (cantidadAdultos + cantidadNinos + cantidadSeniors);
+                            eventoDoc.reference.update({'boletosDisponibles': nuevosBoletosDisponibles})
+                                .then((_) {
+                              // Navegar a la pantalla de información de la compra
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => InformacionCompra(
+                                    total: total,
+                                    cantidadAdultos: cantidadAdultos,
+                                    cantidadNinos: cantidadNinos,
+                                    cantidadSeniors: cantidadSeniors,
+                                    evento: evento, // Pasa el objeto Evento
+                                    codigoBoleto: codigoBoleto, // Pasa el ID único de la compra
+                                  ),
+                                ),
+                              );
+                            })
+                                .catchError((error) {
+                              // Manejar errores si la actualización falla
+                              print('Error al actualizar los boletos disponibles: $error');
+                            });
+                          } else {
+                            print('No se encontró ningún evento con el nombre: ${evento.nombre}');
+                          }
+                        })
+                            .catchError((error) {
+                          // Manejar errores si la consulta falla
+                          print('Error al buscar el evento: $error');
+                        });
                       },
-                      child: Text('ver informacion de la compra', style: TextStyle(fontSize: 22, fontWeight: FontWeight.normal)),
+                      child: Text('Guardar Compra', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     ),
-
-                    // Muestra el código QR basado en el ID único de la compra
                   ],
                 ),
               ),
