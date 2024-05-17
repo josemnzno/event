@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event/DetalleEvento.dart';
 import 'package:intl/intl.dart'; // Importa la clase DateFormat
-
 import 'Crear_Evento.dart'; // Importa la pantalla de detalles del evento
 
 class EventosScreen extends StatefulWidget {
@@ -152,7 +151,7 @@ class _EventosScreenState extends State<EventosScreen> {
                       child: ListView.builder(
                         itemCount: _filteredEventos.length,
                         itemBuilder: (context, index) {
-                          var evento = _filteredEventos[index];
+                          Map<String, dynamic> evento = _filteredEventos[index] as Map<String, dynamic>;
                           // Formatear la fecha utilizando DateFormat
                           var fechaInicio = DateFormat('dd/MM/yyyy').format(evento['fechaInicio'].toDate());
 

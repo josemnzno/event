@@ -9,10 +9,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event/DetalleEvento.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/src/intl/date_format.dart';
 
 import 'package:event/main.dart';
 
 void main() {
+  DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+
   testWidgets('DetalleEvento Widget Test', (WidgetTester tester) async {
     final sampleEvent = {
       'nombre': 'Sample Event',
@@ -24,22 +27,21 @@ void main() {
       'precioAdulto': 100.0,
       'precioNino': 50.0,
       'precioSenior': 70.0,
+      'ubicacion': GeoPoint(37.7749, -122.4194), // Sample GeoPoint (San Francisco)
     };
 
     // Build our widget and trigger a frame.
     await tester.pumpWidget(MaterialApp(
-      home: DetalleEvento(),
+      home: DetalleEvento(evento: sampleEvent),
     ));
 
-    // Verify that the information is displayed correctly
     expect(find.text('Informacion'), findsOneWidget);
     expect(find.text('Evento: Sample Event'), findsOneWidget);
     expect(find.text('Descripción: Sample description'), findsOneWidget);
-    expect(find.text('Inicio:'), findsOneWidget);
-    expect(find.text('Fin:'), findsOneWidget);
-    expect(find.text('Precio Adulto: \$10.0'), findsOneWidget);
-    expect(find.text('Precio Niño: \$5.0'), findsOneWidget);
-    expect(find.text('Precio Senior: \$7.0'), findsOneWidget);
+    expect(find.text('Inicio: ${dateFormat.format((sampleEvent['fechaInicio'] as Timestamp).toDate())} - ${sampleEvent['horaInicio']}'), findsOneWidget);
+    expect(find.text('Fin: ${dateFormat.format((sampleEvent['fechaFin'] as Timestamp).toDate())} - ${sampleEvent['horaFin']}'), findsOneWidget);
+    expect(find.text('Precio Adulto: \$100.0'), findsOneWidget);
+    expect(find.text('Precio Niño: \$50.0'), findsOneWidget);
+    expect(find.text('Precio Senior: \$70.0'), findsOneWidget);
   });
-  }
 }
