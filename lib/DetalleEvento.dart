@@ -4,20 +4,17 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
 class DetalleEvento extends StatelessWidget {
-  final QueryDocumentSnapshot evento;
+  final Map<String, dynamic> evento;
 
   const DetalleEvento({Key? key, required this.evento}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> data = evento.data() as Map<String, dynamic>;
 
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-    String fechaInicio = dateFormat.format(data['fechaInicio'].toDate());
-    String fechaFin = dateFormat.format(data['fechaFin'].toDate());
 
     // Extraer las coordenadas de ubicación
-    GeoPoint ubicacion = data['ubicacion'];
+    GeoPoint ubicacion = evento['ubicacion'];
 
     return Scaffold(
       body: Container(
@@ -48,13 +45,13 @@ class DetalleEvento extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 20),
-                    _buildText('Evento: ${data['nombre']}'),
-                    _buildText('Descripción: ${data['descripcion']}'),
-                    _buildText('Inicio: $fechaInicio - ${data['horaInicio']}'),
-                    _buildText('Fin: $fechaFin - ${data['horaFin']} '),
-                    _buildText('Precio Adulto: \$${data['precioAdulto']}'),
-                    _buildText('Precio Niño:\$${data['precioNino']} '),
-                    _buildText('Precio Senior: \$${data['precioSenior']}'),
+                    _buildText('Evento: ${evento['nombre']}'),
+                    _buildText('Descripción: ${evento['descripcion']}'),
+                    _buildText('Inicio: ${dateFormat.format(evento['fechaInicio'].toDate())} - ${evento['horaInicio']}'),
+                    _buildText('Fin: ${dateFormat.format(evento['fechaFin'].toDate())} - ${evento['horaFin']}'),
+                    _buildText('Precio Adulto: \$${evento['precioAdulto']}'),
+                    _buildText('Precio Niño: \$${evento['precioNino']}'),
+                    _buildText('Precio Senior: \$${evento['precioSenior']}'),
                     // Mostrar las coordenadas de ubicación como texto
                     SizedBox(height: 10),
                     Text(
