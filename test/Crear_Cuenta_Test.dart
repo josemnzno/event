@@ -10,13 +10,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> initializeFirebase() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-}
+
 
 Future<void> main() async {
-  await initializeFirebase();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyDVDgVLSW419qLFGlXYNaUC5xCKx-dKhHQ",
+      appId: "1:985779589426:android:598f42e1a5c58ade37072b",
+      messagingSenderId: "985779589426",
+      projectId: "eveentapp"
+    ),
+  );
 
   group('UI Render Tests', () {
     testWidgets('Initial UI elements are displayed correctly', (
