@@ -7,13 +7,20 @@
 
 import 'package:event/Inicio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:event/main.dart';
 
-void main() {
-  void main() {
+Future<void> main() async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await Firebase.initializeApp();
+    FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  });
+
     testWidgets('Inicio Widget Test', (WidgetTester tester) async {
       // Build our widget and trigger a frame.
       await tester.pumpWidget(MaterialApp(
@@ -48,5 +55,4 @@ void main() {
       // Verify that navigation to the registration page works
       expect(find.text('Crear Cuenta Page'), findsOneWidget);
     });
-  }
 }
