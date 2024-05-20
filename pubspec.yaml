@@ -46,6 +46,7 @@ dependencies:
   location: ^6.0.1
   google_places_autocomplete_flutter: ^1.0.6
   firebase_storage: ^11.7.4
+  charts_flutter: ^0.11.0
 
 
 
