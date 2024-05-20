@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 class DetalleEvento extends StatelessWidget {
   final Map<String, dynamic> evento;
-
   const DetalleEvento({Key? key, required this.evento}) : super(key: key);
 
   @override
