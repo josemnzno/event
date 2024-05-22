@@ -2,12 +2,15 @@ import 'package:event/Seleccion.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:syncfusion_flutter_core/core.dart';
 
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  SyncfusionLicense.registerLicense('YOUR_LICENSE_KEY');
+
   runApp(MyApp());
 }
 

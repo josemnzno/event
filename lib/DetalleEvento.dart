@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event/Gastos_Evento.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -79,6 +80,31 @@ class DetalleEvento extends StatelessWidget {
                           ),
                         ]),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Navigate to the first window
+                      },
+                      child: Text('Modificar Evento'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Gastos_Evento(),
+                          ),
+                        );
+                      },
+                      child: Text('Ver estadísticas'),
                     ),
                   ],
                 ),
