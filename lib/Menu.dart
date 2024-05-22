@@ -152,7 +152,7 @@ class _EventosScreenState extends State<EventosScreen> {
                       child: ListView.builder(
                         itemCount: _filteredEventos.length,
                         itemBuilder: (context, index) {
-                          Map<String, dynamic> evento = _filteredEventos[index] as Map<String, dynamic>;
+                          QueryDocumentSnapshot evento = _filteredEventos[index];
                           // Formatear la fecha utilizando DateFormat
                           var fechaInicio = DateFormat('dd/MM/yyyy').format(evento['fechaInicio'].toDate());
 
@@ -184,7 +184,7 @@ class _EventosScreenState extends State<EventosScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DetalleEvento(evento: evento),
+                                    builder: (context) => DetalleEvento(evento: evento.data() as Map<String, dynamic>),
                                   ),
                                 );
                               },
