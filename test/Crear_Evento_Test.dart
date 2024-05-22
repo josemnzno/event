@@ -6,14 +6,10 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:event/Crear_Evento.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-
+void main() {
   group('Crear_Evento Widget Tests', () {
     testWidgets('Widget Renders Correctly', (WidgetTester tester) async {
       // Build our widget and trigger a frame.
