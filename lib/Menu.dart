@@ -152,7 +152,7 @@ class _EventosScreenState extends State<EventosScreen> {
                       child: ListView.builder(
                         itemCount: _filteredEventos.length,
                         itemBuilder: (context, index) {
-                          var evento = _filteredEventos[index];
+                          Map<String, dynamic> evento = _filteredEventos[index] as Map<String, dynamic>;
                           // Formatear la fecha utilizando DateFormat
                           var fechaInicio = DateFormat('dd/MM/yyyy').format(evento['fechaInicio'].toDate());
 
