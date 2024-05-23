@@ -48,6 +48,10 @@ dependencies:
   firebase_storage: ^11.7.4
   qr_flutter: ^4.0.1
   flutter_email_sender: ^6.0.3
+  pdf: ^3.6.5
+  path_provider: ^2.0.12
+  open_filex: ^4.0.2
+  qr_code_scanner: ^1.0.1
 
 
 

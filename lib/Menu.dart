@@ -1,10 +1,13 @@
+import 'package:event/ValidacionBoleto.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event/DetalleEvento.dart';
-import 'package:intl/intl.dart'; // Importa la clase DateFormat
-
-import 'Crear_Evento.dart'; // Importa la pantalla de detalles del evento
+import 'package:intl/intl.dart';
+import 'Crear_Evento.dart';
+import 'Cuenta.dart';
+import 'Inicio.dart';
+import 'MisEventosComprados.dart';
+import 'DetalleEvento.dart';
 
 class EventosScreen extends StatefulWidget {
   const EventosScreen({Key? key}) : super(key: key);
@@ -33,7 +36,73 @@ class _EventosScreenState extends State<EventosScreen> {
   }
 
   void _showUserMenu(BuildContext context) {
-    // Implementa el menú de usuario aquí
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(100, 100, 0, 0), // Posición del menú
+      items: [
+        PopupMenuItem(
+          value: 'cuenta',
+          child: Text('Cuenta'),
+        ),
+        PopupMenuItem(
+          value: 'compras',
+          child: Text('Mis Compras'),
+        ),
+        PopupMenuItem(
+          value: 'eventos',
+          child: Text('Mis Eventos'),
+        ),
+        PopupMenuItem(
+          value: 'validar_boleto',
+          child: Text('Validar Boleto'), // Nueva opción para validar boleto
+        ),
+        PopupMenuItem(
+          value: 'cerrar_sesion',
+          child: Text('Cerrar Sesión'),
+        ),
+      ],
+    ).then((value) {
+      if (value != null) {
+        switch (value) {
+          case 'cuenta':
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CuentaScreen()),
+            );
+            break;
+          case 'compras':
+            User? user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MisEventosComprados(userId: user.uid),
+                ),
+              );
+            }
+            break;
+          case 'eventos':
+          // Navega a la pantalla de eventos si es necesario
+            break;
+          case 'validar_boleto':
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => QRScanScreen(),
+              ),
+            );
+            break;
+          case 'cerrar_sesion':
+            FirebaseAuth.instance.signOut();
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => Inicio()),
+                  (route) => false,
+            );
+            break;
+        }
+      }
+    });
   }
 
   @override
