@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // Importa el paquete intl
 
 class QRScanScreen extends StatefulWidget {
   @override
@@ -44,11 +44,63 @@ class _QRScanScreenState extends State<QRScanScreen> {
       if (querySnapshot.docs.isEmpty) {
         _showDialog('Boleto inválido', 'Este boleto no es válido.');
       } else {
-        _showDialog('Boleto válido', 'Este boleto es válido.');
+        final boletoData = querySnapshot.docs.first.data();
+        _showBoletoDialog(boletoData);
       }
     } catch (e) {
       _showDialog('Error', 'Hubo un error al validar el boleto.');
     }
+  }
+
+  void _showBoletoDialog(Map<String, dynamic> boletoData) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Boleto válido'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildBoletoDetail('Evento', boletoData['nombreEvento']),
+            _buildBoletoDetail('Descripción', boletoData['descripcionEvento']),
+            _buildBoletoDetail('Inicio', _formatTimestamp(boletoData['inicioEvento'])),
+            _buildBoletoDetail('Fin', _formatTimestamp(boletoData['finEvento'])),
+            _buildBoletoDetail('Cantidad de Adultos', boletoData['cantidadAdultos'].toString()),
+            _buildBoletoDetail('Cantidad de Niños', boletoData['cantidadNinos'].toString()),
+            _buildBoletoDetail('Cantidad de Seniors', boletoData['cantidadSeniors'].toString()),
+            _buildBoletoDetail('Total', '\$${boletoData['total'].toString()}'),
+            _buildBoletoDetail('Código Boleto', boletoData['codigoBoleto']),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                result = null;
+              });
+              Navigator.of(context).pop();
+              controller?.resumeCamera();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime date = timestamp.toDate();
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  Widget _buildBoletoDetail(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        '$label: $value',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
   }
 
   void _showDialog(String title, String content) {
