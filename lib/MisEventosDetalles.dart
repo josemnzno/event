@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'CompraBoletosScreen.dart'; // Importa la pantalla de compra de boletos
+
+import 'DetalleEventoComprado.dart';
+import 'EstadisticasEvento.dart';
 
 // Modelo de datos para el evento
-class Evento {
+class MisEvento {
   final String nombre;
   final String descripcion;
   final DateTime fechaInicio;
@@ -16,10 +18,11 @@ class Evento {
   final double precioNino;
   final double precioSenior;
   final int boletosDisponibles;
+  final int boletosTotales;
   final String imagenUrl;
   final GeoPoint ubicacion;
 
-  Evento({
+  MisEvento({
     required this.nombre,
     required this.descripcion,
     required this.fechaInicio,
@@ -32,24 +35,25 @@ class Evento {
     required this.boletosDisponibles,
     required this.imagenUrl,
     required this.ubicacion,
+    required this.boletosTotales,
   });
 }
 
-class DetalleEvento extends StatefulWidget {
+class MisEventosDetalles extends StatefulWidget {
   final QueryDocumentSnapshot evento;
 
-  const DetalleEvento({Key? key, required this.evento}) : super(key: key);
+  const MisEventosDetalles({Key? key, required this.evento}) : super(key: key);
 
   @override
   _DetalleEventoState createState() => _DetalleEventoState();
 }
 
-class _DetalleEventoState extends State<DetalleEvento> {
+class _DetalleEventoState extends State<MisEventosDetalles> {
   late int cantidadAdultos;
   late int cantidadNinos;
   late int cantidadSeniors;
   late String imageUrl;
-  late Evento evento; // Definir el parámetro evento
+  late MisEvento evento; // Definir el parámetro evento
 
   @override
   void initState() {
@@ -64,7 +68,7 @@ class _DetalleEventoState extends State<DetalleEvento> {
     DateTime fechaFin = data['fechaFin'].toDate();
     GeoPoint ubicacion = data['ubicacion'];
 
-    evento = Evento(
+    evento = MisEvento(
       nombre: data['nombre'],
       descripcion: data['descripcion'],
       fechaInicio: fechaInicio,
@@ -75,6 +79,7 @@ class _DetalleEventoState extends State<DetalleEvento> {
       precioNino: data['precioNino'],
       precioSenior: data['precioSenior'],
       boletosDisponibles: data['boletosDisponibles'],
+      boletosTotales: data['boletosTotales'],
       imagenUrl: data['imagenUrl'],
       ubicacion: data['ubicacion'],
     );
@@ -83,10 +88,6 @@ class _DetalleEventoState extends State<DetalleEvento> {
   bool _haySuficientesBoletos() {
     int totalBoletosSeleccionados = cantidadAdultos + cantidadNinos + cantidadSeniors;
     return totalBoletosSeleccionados <= evento.boletosDisponibles;
-  }
-
-  bool _boletosSeleccionados() {
-    return cantidadAdultos > 0 || cantidadNinos > 0 || cantidadSeniors > 0;
   }
 
   @override
@@ -129,6 +130,7 @@ class _DetalleEventoState extends State<DetalleEvento> {
                       _buildText('Precio Niño: \$${evento.precioNino}'),
                       _buildText('Precio Senior: \$${evento.precioSenior}'),
                       _buildText('Boletos disponibles: ${evento.boletosDisponibles}'),
+                      _buildText('Boletos Totales:${evento.boletosTotales}'),
                       SizedBox(height: 10),
                       Text(
                         'Imagen de el evento',
@@ -179,50 +181,18 @@ class _DetalleEventoState extends State<DetalleEvento> {
                           ]),
                         ),
                       ),
-                      _buildCantidadBoletos('Adultos', cantidadAdultos, (value) {
-                        setState(() {
-                          cantidadAdultos = int.parse(value);
-                        });
-                      }),
-                      _buildCantidadBoletos('Niños', cantidadNinos, (value) {
-                        setState(() {
-                          cantidadNinos = int.parse(value);
-                        });
-                      }),
-                      _buildCantidadBoletos('Seniors', cantidadSeniors, (value) {
-                        setState(() {
-                          cantidadSeniors = int.parse(value);
-                        });
-                      }),
-                      _buildText('Total: \$${_calcularTotal().toStringAsFixed(2)}'),
+                      SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: _haySuficientesBoletos() && _boletosSeleccionados() ? () {
+                        onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DetalleCompraScreen(
-                                total: _calcularTotal(),
-                                cantidadAdultos: cantidadAdultos,
-                                cantidadNinos: cantidadNinos,
-                                cantidadSeniors: cantidadSeniors,
-                                evento: evento, // Pasar el objeto Evento
-                                boletosDisponibles: evento.boletosDisponibles, // Pasar boletos disponibles
-                              ),
+                              builder: (context) => EstadisticasEvento(evento:widget.evento),
                             ),
                           );
-                        } : null,
-                        child: Text('Comprar'),
+                        },
+                        child: Text('Ver estadísticas'),
                       ),
-                      if (!_haySuficientesBoletos())
-                        Text(
-                          'No hay suficientes boletos disponibles',
-                          style: TextStyle(color: Colors.red, fontSize: 16),
-                        ),
-                      if (!_boletosSeleccionados())
-                        Text(
-                          'Debe seleccionar al menos un boleto para comprar',
-                          style: TextStyle(color: Colors.red, fontSize: 16),
-                        ),
                     ],
                   ),
                 ),

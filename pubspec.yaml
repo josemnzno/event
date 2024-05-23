@@ -52,6 +52,8 @@ dependencies:
   path_provider: ^2.0.12
   open_filex: ^4.0.2
   qr_code_scanner: ^1.0.1
+  charts_flutter: ^0.12.0
+
 
 
 

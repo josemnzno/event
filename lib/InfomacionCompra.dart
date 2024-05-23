@@ -1,16 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:event/DetalleEvento.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:event/MisEventosComprados.dart';
+
+import 'DetalleEvento.dart';
 
 class InformacionCompra extends StatefulWidget {
   final Evento evento;
@@ -55,6 +52,7 @@ class _InformacionCompraState extends State<InformacionCompra> {
         userId = user.uid;
       } else {
         // El usuario no ha iniciado sesión, maneja este caso según tu lógica
+        return;
       }
 
       // Guardar la compra en Firestore
@@ -75,10 +73,13 @@ class _InformacionCompraState extends State<InformacionCompra> {
         'codigoBoleto': widget.codigoBoleto,
       });
 
+      // Actualizar la cantidad de boletos disponibles en el evento
+      await _actualizarCantidadBoletos(firestore);
+
       // Regresar a la pantalla de MisEventosComprados después de guardar la compra
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MisEventosComprados(userId: userId ?? '')),
+        MaterialPageRoute(builder: (context) => MisEventosComprados(userId: userId!)),
       );
 
       // Habilitar el botón de nuevo después de 10 minutos
@@ -97,6 +98,58 @@ class _InformacionCompraState extends State<InformacionCompra> {
       });
     }
   }
+
+  Future<void> _actualizarCantidadBoletos(FirebaseFirestore firestore) async {
+    try {
+      // Buscar el documento del evento por el campo 'nombre'
+      QuerySnapshot querySnapshot = await firestore
+          .collection('Eventos')
+          .where('nombre', isEqualTo: widget.evento.nombre)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        print("Evento no encontrado: ${widget.evento.nombre}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Evento no encontrado: ${widget.evento.nombre}")),
+        );
+        return;
+      }
+
+      // Asumimos que solo hay un documento que coincide con el nombre del evento
+      DocumentSnapshot eventoDoc = querySnapshot.docs.first;
+
+      // Imprimir los datos del documento del evento para verificar
+      print("Datos del evento antes de la actualización: ${eventoDoc.data()}");
+
+      int cantidadAdultosActual = eventoDoc.get('adulto') ?? 0;
+      int cantidadNinosActual = eventoDoc.get('nino') ?? 0;
+      int cantidadSeniorsActual = eventoDoc.get('senior') ?? 0;
+
+      // Sumar las cantidades compradas a los valores actuales
+      int cantidadAdultosNueva = cantidadAdultosActual + widget.cantidadAdultos;
+      int cantidadNinosNueva = cantidadNinosActual + widget.cantidadNinos;
+      int cantidadSeniorsNueva = cantidadSeniorsActual + widget.cantidadSeniors;
+
+      // Actualizar el documento del evento con los nuevos valores
+      await firestore.collection('Eventos').doc(eventoDoc.id).update({
+        'adulto': cantidadAdultosNueva,
+        'nino': cantidadNinosNueva,
+        'senior': cantidadSeniorsNueva,
+      });
+
+      print("Boletos actualizados correctamente");
+
+      // Obtener y mostrar los nuevos datos del documento del evento
+      DocumentSnapshot eventoActualizado = await firestore.collection('Eventos').doc(eventoDoc.id).get();
+      print("Datos del evento después de la actualización: ${eventoActualizado.data()}");
+    } catch (error) {
+      print('Error al actualizar la cantidad de boletos en el evento: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar la cantidad de boletos: $error')),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {

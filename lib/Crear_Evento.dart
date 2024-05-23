@@ -82,7 +82,6 @@ class _Crear_EventoState extends State<Crear_Evento> {
     });
   }
 
-
   Future<void> _guardarEvento() async {
     // Deshabilitar el botón mientras se guarda el evento
     setState(() {
@@ -102,6 +101,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
         'usuarioId': widget.usuario?.uid,
         'nombre': _nombreEventoController.text,
         'boletosDisponibles': int.parse(_boletosDisponiblesController.text),
+        'boletosTotales': int.parse(_boletosDisponiblesController.text), // Asigna el mismo valor inicialmente
         'precioAdulto': double.parse(_precioAdultoController.text),
         'precioNino': double.parse(_precioNinoController.text),
         'precioSenior': double.parse(_precioSeniorController.text),
@@ -112,6 +112,10 @@ class _Crear_EventoState extends State<Crear_Evento> {
         'horaFin': horaFin,
         'imagenUrl': imageUrl,
         'ubicacion': _selectedLocation != null ? GeoPoint(_selectedLocation!.latitude, _selectedLocation!.longitude) : null,
+        // Inicializar las variables nino, adulto y senior con valores predeterminados
+        'nino': 0,
+        'adulto': 0,
+        'senior': 0,
       });
 
       // Mostrar el diálogo de evento creado con éxito
@@ -130,6 +134,7 @@ class _Crear_EventoState extends State<Crear_Evento> {
       });
     }
   }
+
 
   Future<String> _uploadImageToStorage() async {
     try {

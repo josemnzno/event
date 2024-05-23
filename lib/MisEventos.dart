@@ -1,13 +1,47 @@
+import 'package:event/MisEventosDetalles.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'EventoComprado.dart';
-import 'Menu.dart'; // Importa la pantalla de detalles del evento
 
-class MisEventosComprados extends StatelessWidget {
-  final String userId;
+class EventosCreadosScreen extends StatefulWidget {
+  @override
+  _EventosCreadosScreenState createState() => _EventosCreadosScreenState();
+}
 
-  MisEventosComprados({required this.userId});
+class _EventosCreadosScreenState extends State<EventosCreadosScreen> {
+  User? user;
+  List<Map<String, dynamic>> eventos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getEventosCreados();
+  }
+
+  Future<void> _getEventosCreados() async {
+    user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String userId = user!.uid;
+      QuerySnapshot eventQuery = await FirebaseFirestore.instance
+          .collection('Eventos')
+          .where('usuarioId', isEqualTo: userId)
+          .get();
+
+      if (eventQuery.docs.isNotEmpty) {
+        setState(() {
+          eventos = eventQuery.docs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .toList();
+        });
+      }
+    }
+  }
+
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime date = timestamp.toDate();
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +67,7 @@ class MisEventosComprados extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Mis eventos comprados',
+                  'Mis eventos creados',
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -41,20 +75,15 @@ class MisEventosComprados extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: _buildEventosComprados(context),
+                  child: _buildEventosCreados(context),
                 ),
                 SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EventosScreen(),
-                        ),
-                            (route) => false, // Esto elimina todas las rutas anteriores
-                      );
+
+
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
@@ -80,11 +109,11 @@ class MisEventosComprados extends StatelessWidget {
     );
   }
 
-  Widget _buildEventosComprados(BuildContext context) {
+  Widget _buildEventosCreados(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('Boletos')
-          .where('userId', isEqualTo: userId)
+          .collection('Eventos')
+          .where('usuarioId', isEqualTo: user?.uid)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -96,64 +125,53 @@ class MisEventosComprados extends StatelessWidget {
         if (snapshot.hasData) {
           final eventos = snapshot.data!.docs;
           if (eventos.isEmpty) {
-            return Center(child: Text('No hay eventos comprados'));
+            return Center(child: Text('No has creado eventos'));
           }
-
-          Set<String> idsBoletos = Set<String>();
 
           return ListView.builder(
             itemCount: eventos.length,
             itemBuilder: (context, index) {
               final evento = eventos[index];
-              final idBoleto = evento['codigoBoleto'];
-              final fechaInicio = evento['inicioEvento'] as Timestamp;
+              final fechaInicio = evento['fechaInicio'] as Timestamp;
+              final formattedDate = _formatTimestamp(fechaInicio);
 
-              if (idsBoletos.contains(idBoleto)) {
-                return SizedBox.shrink();
-              } else {
-                idsBoletos.add(idBoleto);
-
-                // Formatear la fecha en el formato deseado: día/mes/año
-                final formattedDate = DateFormat('dd/MM/yyyy').format(fechaInicio.toDate());
-
-                return Card(
-                  color: Colors.greenAccent[100],
-                  child: ListTile(
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          evento['nombreEvento'],
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+              return Card(
+                color: Colors.greenAccent[100],
+                child: ListTile(
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        evento['nombre'],
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
-                        Text(
-                          'Fecha: $formattedDate',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
+                      ),
+                      Text(
+                        'Fecha: $formattedDate',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
                         ),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetalleEventoComprado(evento: evento),
-                        ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                );
-              }
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MisEventosDetalles(evento: evento)
+                      ),
+                    );
+                  },
+                ),
+              );
             },
           );
         }
-        return Center(child: Text('No hay eventos comprados'));
+        return Center(child: Text('No has creado eventos'));
       },
     );
   }

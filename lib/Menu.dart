@@ -1,13 +1,15 @@
+import 'package:event/Crear_Evento.dart';
+import 'package:event/Cuenta.dart';
+import 'package:event/DetalleEvento.dart';
+import 'package:event/Inicio.dart';
+import 'package:event/MisEventosComprados.dart';
 import 'package:event/ValidacionBoleto.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'Crear_Evento.dart';
-import 'Cuenta.dart';
-import 'Inicio.dart';
-import 'MisEventosComprados.dart';
-import 'DetalleEvento.dart';
+
+import 'MisEventos.dart';
 
 class EventosScreen extends StatefulWidget {
   const EventosScreen({Key? key}) : super(key: key);
@@ -82,7 +84,10 @@ class _EventosScreenState extends State<EventosScreen> {
             }
             break;
           case 'eventos':
-          // Navega a la pantalla de eventos si es necesario
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EventosCreadosScreen()),
+            );
             break;
           case 'validar_boleto':
             Navigator.push(
