@@ -27,10 +27,9 @@ void main() {
       'precioAdulto': 100.0,
       'precioNino': 50.0,
       'precioSenior': 70.0,
-      'ubicacion': GeoPoint(37.7749, -122.4194), // Sample GeoPoint (San Francisco)
+      'ubicacion': GeoPoint(37.7749, -122.4194),
     };
 
-    // Build our widget and trigger a frame.
     await tester.pumpWidget(MaterialApp(
       home: DetalleEvento(evento: sampleEvent),
     ));

@@ -39,8 +39,7 @@ Future<void> main() async {
         WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
 
-      final emailField = find.byType(TextFormField).at(
-          3); // Assuming email field is the fourth TextFormField
+      final emailField = find.byType(TextFormField).at(3);
       await tester.enterText(emailField, 'invalid_email');
       await tester.pump();
 
@@ -52,10 +51,8 @@ Future<void> main() async {
         WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
 
-      final passwordField = find.byType(TextFormField).at(
-          5); // Assuming password field is the sixth TextFormField
-      final confirmPasswordField = find.byType(TextFormField).at(
-          6); // Assuming confirm password field is the seventh TextFormField
+      final passwordField = find.byType(TextFormField).at(5);
+      final confirmPasswordField = find.byType(TextFormField).at(6);
 
       await tester.enterText(passwordField, 'password123');
       await tester.enterText(confirmPasswordField, 'differentPassword');
@@ -68,8 +65,7 @@ Future<void> main() async {
         WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: Crear_cuenta()));
 
-      final phoneField = find.byType(TextFormField).at(
-          2); // Assuming phone field is the third TextFormField
+      final phoneField = find.byType(TextFormField).at(2);
       await tester.enterText(phoneField, '123');
       await tester.pump();
 

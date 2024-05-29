@@ -16,15 +16,12 @@ Future<void> main() async {
 
   group('Crear_Evento Widget Tests', () {
     testWidgets('Widget Renders Correctly', (WidgetTester tester) async {
-      // Build our widget and trigger a frame.
+
       await tester.pumpWidget(MaterialApp(
         home: Crear_Evento(),
       ));
 
-      // Verify that the Create Event title is rendered
       expect(find.text('Crear Evento'), findsOneWidget);
-
-      // Verify that some specific widgets are rendered
       expect(find.byType(TextFormField), findsNWidgets(6));
       expect(find.byType(ElevatedButton), findsNWidgets(3)); // Adjusted to the number of ElevatedButtons in your widget
       expect(find.byType(GestureDetector), findsNWidgets(3));
@@ -36,13 +33,8 @@ Future<void> main() async {
         home: Crear_Evento(),
       ));
 
-      // Tap the image widget to select an image
       await tester.tap(find.byType(GestureDetector).at(0));
       await tester.pump();
-
-      // Here, you can add further expectations based on the behavior after selecting an image
     });
-
-    // Add more tests for other functionalities like selecting location, saving event, etc.
   });
 }
