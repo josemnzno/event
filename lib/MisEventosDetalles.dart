@@ -21,6 +21,9 @@ class MisEvento {
   final int boletosTotales;
   final String imagenUrl;
   final GeoPoint ubicacion;
+  final int boletosAdultosVendidos;
+  final int boletosNinosVendidos;
+  final int boletosSeniorsVendidos;
 
   MisEvento({
     required this.nombre,
@@ -36,8 +39,12 @@ class MisEvento {
     required this.imagenUrl,
     required this.ubicacion,
     required this.boletosTotales,
+    required this.boletosAdultosVendidos,
+    required this.boletosNinosVendidos,
+    required this.boletosSeniorsVendidos,
   });
 }
+
 
 class MisEventosDetalles extends StatefulWidget {
   final QueryDocumentSnapshot evento;
@@ -53,7 +60,7 @@ class _DetalleEventoState extends State<MisEventosDetalles> {
   late int cantidadNinos;
   late int cantidadSeniors;
   late String imageUrl;
-  late MisEvento evento; // Definir el parámetro evento
+  late MisEvento evento;
 
   @override
   void initState() {
@@ -82,6 +89,9 @@ class _DetalleEventoState extends State<MisEventosDetalles> {
       boletosTotales: data['boletosTotales'],
       imagenUrl: data['imagenUrl'],
       ubicacion: data['ubicacion'],
+      boletosNinosVendidos: data['nino'],
+      boletosAdultosVendidos: data['adulto'],
+      boletosSeniorsVendidos: data['senior'],
     );
   }
 
@@ -114,7 +124,7 @@ class _DetalleEventoState extends State<MisEventosDetalles> {
                     children: [
                       SizedBox(height: 65),
                       Text(
-                        'Informacion',
+                        'Información',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -125,15 +135,15 @@ class _DetalleEventoState extends State<MisEventosDetalles> {
                       _buildText('Evento: ${evento.nombre}'),
                       _buildText('Descripción: ${evento.descripcion}'),
                       _buildText('Inicio: ${DateFormat('dd/MM/yyyy').format(evento.fechaInicio)} - ${evento.horaInicio}'),
-                      _buildText('Fin: ${DateFormat('dd/MM/yyyy').format(evento.fechaFin)} - ${evento.horaFin} '),
+                      _buildText('Fin: ${DateFormat('dd/MM/yyyy').format(evento.fechaFin)} - ${evento.horaFin}'),
                       _buildText('Precio Adulto: \$${evento.precioAdulto}'),
                       _buildText('Precio Niño: \$${evento.precioNino}'),
                       _buildText('Precio Senior: \$${evento.precioSenior}'),
                       _buildText('Boletos disponibles: ${evento.boletosDisponibles}'),
-                      _buildText('Boletos Totales:${evento.boletosTotales}'),
+                      _buildText('Boletos Totales: ${evento.boletosTotales}'),
                       SizedBox(height: 10),
                       Text(
-                        'Imagen de el evento',
+                        'Imagen del evento',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -187,12 +197,19 @@ class _DetalleEventoState extends State<MisEventosDetalles> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EstadisticasEvento(evento:widget.evento),
+                              builder: (context) => EstadisticasEventos(evento: evento),
                             ),
                           );
                         },
-                        child: Text('Ver estadísticas'),
+                        child: Text(
+                          'Ver Estadísticas',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
+
                     ],
                   ),
                 ),
@@ -231,7 +248,7 @@ class _DetalleEventoState extends State<MisEventosDetalles> {
       child: Text(
         text,
         style: TextStyle(fontSize: 20, color: Colors.black),
-        textAlign: TextAlign.center, // Alinea el texto al centro
+        textAlign: TextAlign.center,
       ),
     );
   }
